@@ -72,34 +72,37 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 
-    UIApplicationState appState = application.applicationState;
-
-    NSMutableDictionary* notification = [NSMutableDictionary dictionaryWithDictionary:[userInfo objectForKey:@"aps"]];
-    NSMutableDictionary* payload = [NSMutableDictionary dictionaryWithDictionary:[userInfo mutableCopy]];
-    [payload removeObjectForKey:@"aps"];
-
-    [notification setObject: payload forKey:@"custom"];
-    [notification setObject:[self getUUID] forKey:@"uuid"];
-    [notification setObject:[self getCurrentDate] forKey:@"timestamp"];
-
-    if (appState == UIApplicationStateActive) {
-        NSLog(@"active");
-        NSLog(@"%@",notification);
-        [notification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
+    if (application.applicationState == UIApplicationStateBackground) {
+        NSLog(@"Background");
     }
-    else {
-        NSLog(@"Inactive");
-        NSLog(@"coldstart");
-        NSLog(@"%@",notification);
-        [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
-        [notification setObject:[NSNumber numberWithBool:YES] forKey:@"coldstart"];
-    }
+    // UIApplicationState appState = application.applicationState;
 
-    [[NotificationService instance] receivedNotification:notification];
+    // NSMutableDictionary* notification = [NSMutableDictionary dictionaryWithDictionary:[userInfo objectForKey:@"aps"]];
+    // NSMutableDictionary* payload = [NSMutableDictionary dictionaryWithDictionary:[userInfo mutableCopy]];
+    // [payload removeObjectForKey:@"aps"];
 
-    if (appState == UIApplicationStateBackground) {
-        completionHandler(UIBackgroundFetchResultNewData);
-    }
+    // [notification setObject: payload forKey:@"custom"];
+    // [notification setObject:[self getUUID] forKey:@"uuid"];
+    // [notification setObject:[self getCurrentDate] forKey:@"timestamp"];
+
+    // if (appState == UIApplicationStateActive) {
+    //     NSLog(@"active");
+    //     NSLog(@"%@",notification);
+    //     [notification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
+    // }
+    // else {
+    //     NSLog(@"Inactive");
+    //     NSLog(@"coldstart");
+    //     NSLog(@"%@",notification);
+    //     [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+    //     [notification setObject:[NSNumber numberWithBool:YES] forKey:@"coldstart"];
+    // }
+
+    // [[NotificationService instance] receivedNotification:notification];
+
+    // if (appState == UIApplicationStateBackground) {
+    //     completionHandler(UIBackgroundFetchResultNewData);
+    // }
 }
 
 - (NSString*) getCurrentDate {
