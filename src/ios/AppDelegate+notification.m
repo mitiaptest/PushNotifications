@@ -39,15 +39,15 @@
 	if (notification) {
 		NSDictionary *launchOptions = [notification userInfo];
         if (launchOptions){
-			
+
             NSMutableDictionary* notification = [NSMutableDictionary dictionaryWithDictionary:
                                                  [launchOptions objectForKey: @"UIApplicationLaunchOptionsRemoteNotificationKey"]];
-            
+
             [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
             [notification setObject:[NSNumber numberWithBool:YES] forKey:@"userAction"];
 
             [[NotificationService instance] receivedNotification:notification];
-            
+
         }
 	}
 }
@@ -55,45 +55,47 @@
 -(void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings {
 
     [[NotificationService instance] didRegisterUserNotificationSettings:notificationSettings];
-    
+
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    
+
     [[NotificationService instance] onRegistered:deviceToken];
-   
+
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    
+
     [[NotificationService instance] failToRegister:error];
 
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 
-    UIApplicationState appState = application.applicationState;
+    if(application.applicationState == UIApplicationStateInactive) {
 
-    NSMutableDictionary* notification = [NSMutableDictionary dictionaryWithDictionary:[userInfo objectForKey:@"aps"]];
-    NSMutableDictionary* payload = [NSMutableDictionary dictionaryWithDictionary:[userInfo mutableCopy]];
-    [payload removeObjectForKey:@"aps"];
+        NSLog(@"Inactive");
 
-    [notification setObject: payload forKey:@"custom"];
-    [notification setObject:[self getUUID] forKey:@"uuid"];
-    [notification setObject:[self getCurrentDate] forKey:@"timestamp"];
+        //Show the view with the content of the push
 
-    if (appState == UIApplicationStateActive) {
-        [notification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
-    }
-    else {
-        [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
-        [notification setObject:[NSNumber numberWithBool:YES] forKey:@"coldstart"];
-    }
-
-    [[NotificationService instance] receivedNotification:notification];
-
-    if (appState == UIApplicationStateBackground) {
         completionHandler(UIBackgroundFetchResultNewData);
+
+    } else if (application.applicationState == UIApplicationStateBackground) {
+
+        NSLog(@"Background");
+
+        //Refresh the local model
+
+        completionHandler(UIBackgroundFetchResultNewData);
+
+    } else {
+
+        NSLog(@"Active");
+
+        //Show an in-app banner
+
+        completionHandler(UIBackgroundFetchResultNewData);
+
     }
 }
 
