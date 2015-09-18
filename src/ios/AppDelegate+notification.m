@@ -72,30 +72,33 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 
-    if(application.applicationState == UIApplicationStateInactive) {
+    UIApplicationState appState = application.applicationState;
 
+    NSMutableDictionary* notification = [NSMutableDictionary dictionaryWithDictionary:[userInfo objectForKey:@"aps"]];
+    NSMutableDictionary* payload = [NSMutableDictionary dictionaryWithDictionary:[userInfo mutableCopy]];
+    [payload removeObjectForKey:@"aps"];
+
+    [notification setObject: payload forKey:@"custom"];
+    [notification setObject:[self getUUID] forKey:@"uuid"];
+    [notification setObject:[self getCurrentDate] forKey:@"timestamp"];
+
+    if (appState == UIApplicationStateActive) {
+        NSLog(@"active");
+        NSLog(@"%@",notification);
+        [notification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
+    }
+    else {
         NSLog(@"Inactive");
+        NSLog(@"coldstart");
+        NSLog(@"%@",notification);
+        [notification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+        [notification setObject:[NSNumber numberWithBool:YES] forKey:@"coldstart"];
+    }
 
-        //Show the view with the content of the push
+    [[NotificationService instance] receivedNotification:notification];
 
+    if (appState == UIApplicationStateBackground) {
         completionHandler(UIBackgroundFetchResultNewData);
-
-    } else if (application.applicationState == UIApplicationStateBackground) {
-
-        NSLog(@"Background");
-
-        //Refresh the local model
-
-        completionHandler(UIBackgroundFetchResultNewData);
-
-    } else {
-
-        NSLog(@"Active");
-
-        //Show an in-app banner
-
-        completionHandler(UIBackgroundFetchResultNewData);
-
     }
 }
 
